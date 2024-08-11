@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Order</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <h2 class="text-center my-4">Create Order</h2>
+            <form id="createOrderForm">
+                <div class="form-group">
+                    <label for="customerId">Customer:</label>
+                    <select class="form-control" id="customerId" name="customerId" required>
+                        <option value="">Select Customer</option>
+                        <option th:each="customer : ${customers}" th:value="${customer.id}" th:text="${customer.name}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <select class="form-control" id="status" name="status" required>
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Products:</label>
+                    <div th:each="product : ${products}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" th:value="${product.id}" id="product_${product.id}" name="products">
+                            <label class="form-check-label" for="product_${product.id}">
+                                <span th:text="${product.name + ' - ' + product.brand + ' ($' + product.price + ')'}"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="minProducts" name="minProducts" value="1">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a href="/orders" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('#createOrderForm').submit(function(e){
+            e.preventDefault();
+            var formData = {
+                customerId: $('#customerId').val(),
+                status: $('#status').val(),
+                products: []
+            };
+
+            $('input[type="checkbox"]:checked').each(function() {
+                formData.products.push({id: $(this).val()});
+            });
+
+            const data = $.ajax({
+                type: "POST",
+                contentType: "application/json",
+                url: "/orders/create",
+                data: JSON.stringify(formData),
+                dataType: 'json',
+            })
+            console.log(data);
+            setTimeout(()=>{window.location.href = '/orders';},150);
+
+        });
+    });
+</script>
+</body>
+</html>
